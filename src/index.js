@@ -10,6 +10,10 @@ function Square(props) {
   );
 }
 
+function ResetGame(props) {
+  return <button onClick={props.reset}>Reset</button>;
+}
+
 class Board extends React.Component {
   constructor(props) {
     super(props);
@@ -21,10 +25,11 @@ class Board extends React.Component {
 
   handleClick = i => {
     const squares = this.state.squares.slice(); // shallow copy
+    if (calculateWinner(squares) || squares[i]) return; // we want to check for a winner every time
     const xIsNext = this.state.xIsNext;
     squares[i] = xIsNext ? "X" : "O";
     this.setState({ squares: squares, xIsNext: !xIsNext });
-    calculateWinner(this.state.squares);
+    // calculateWinner(this.state.squares);
   };
 
   renderSquare(i) {
@@ -36,9 +41,19 @@ class Board extends React.Component {
     );
   }
   render() {
-    const status = `Next Player: ${this.state.xIsNext ? "X" : "O"}`;
+    const winner = calculateWinner(this.state.squares);
+    let status;
+    if (winner) {
+      status = `Winner: ${winner}`;
+    } else {
+      console.log(winner, "here");
+      status = `Next Player: ${this.state.xIsNext ? "X" : "O"}`;
+    }
     return (
       <div>
+        <ResetGame
+          reset={() => this.setState({ squares: Array(9).fill(null) })}
+        />
         <div className="status">{status}</div>
         <div className="board-row">
           {this.renderSquare(0)}
@@ -91,9 +106,14 @@ function calculateWinner(squares) {
     [0, 4, 8],
     [2, 4, 6]
   ];
+
   for (let i = 0; i < winnerLines.length; i++) {
-    const line = winnerLines[i];
-    console.log(line);
+    let [a, b, c] = winnerLines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[b] === squares[c]) {
+      console.log("winner is ", squares[a]);
+      debugger;
+      return squares[a];
+    }
   }
   return null;
 }
