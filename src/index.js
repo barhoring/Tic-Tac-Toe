@@ -15,15 +15,6 @@ function ResetGame(props) {
 }
 
 class Board extends React.Component {
-  handleClick = i => {
-    const squares = this.state.squares.slice(); // shallow copy
-    if (calculateWinner(squares) || squares[i]) return; // we want to check for a winner every time
-    const xIsNext = this.state.xIsNext;
-    const history = this.state.history.slice();
-    squares[i] = xIsNext ? "X" : "O";
-    this.setState({ squares: squares, xIsNext: !xIsNext, history });
-  };
-
   renderSquare(i) {
     return (
       <Square
@@ -35,9 +26,6 @@ class Board extends React.Component {
   render() {
     return (
       <div>
-        <ResetGame
-          reset={() => this.setState({ squares: Array(9).fill(null) })}
-        />
         <div className="board-row">
           {this.renderSquare(0)}
           {this.renderSquare(1)}
@@ -70,9 +58,20 @@ class Game extends React.Component {
       ]
     };
   }
+
+  handleClick = i => {
+    const current = this.state.history[this.state.history.length - 1]; // last element
+    const squares = current.squares.slice(); // shallow copy
+    if (calculateWinner(squares) || squares[i]) return; // we want to check for a winner every time
+    const xIsNext = this.state.xIsNext;
+    squares[i] = xIsNext ? "X" : "O";
+    const history = this.state.history.slice();
+    history.push({ squares });
+    this.setState({ squares: squares, xIsNext: !xIsNext, history });
+  };
   render() {
-    const current = this.state.history.slice(-1); // last element
-    const winner = calculateWinner(this.state.squares);
+    const current = this.state.history[this.state.history.length - 1]; // last element
+    const winner = calculateWinner(current.squares);
     let status;
     if (winner) {
       status = `Winner: ${winner}`;
@@ -83,11 +82,22 @@ class Game extends React.Component {
 
     return (
       <div className="game">
+        <ResetGame
+          reset={() =>
+            this.setState({
+              history: [
+                {
+                  squares: Array(9).fill(null)
+                }
+              ]
+            })
+          }
+        />
         <div className="game-board">
-          <Board squares={this.state.squares} />
+          <Board squares={current.squares} onClick={this.handleClick} />
         </div>
         <div className="game-info">
-          <div>status</div>
+          <div>{status}</div>
           <ol>{/* TODO */}</ol>
         </div>
       </div>
