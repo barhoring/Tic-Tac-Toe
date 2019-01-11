@@ -51,6 +51,7 @@ class Game extends React.Component {
     super(props);
     this.state = {
       xIsNext: true,
+      stepNumber: 0,
       history: [
         {
           squares: Array(9).fill(null)
@@ -84,11 +85,11 @@ class Game extends React.Component {
     }
     const moves = this.state.history.map((step, move) => {
       return (
-        <li>
+        <li key={move}>
           <button
             onClick={() => {
               debugger;
-              const history = this.state.history.slice(0, move);
+              const history = this.state.history.slice(0, move + 1);
               this.setState({ history });
             }}
           >
